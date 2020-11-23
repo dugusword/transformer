@@ -1,2 +1,2 @@
-# transformer
+# Transformer
 A PyTorch Implementation of Transformer
