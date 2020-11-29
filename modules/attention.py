@@ -4,6 +4,7 @@ import math
 
 class ScaledDotProductAttention(nn.Module):
     def __init__(self, use_mask=False):
+        super(ScaledDotProductAttention, self).__init__()
         self.use_mask = use_mask
         self.softmax = nn.Softmax(dim=1)
 
