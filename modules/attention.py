@@ -127,7 +127,8 @@ class MultiHeadAttention(nn.Module):
         head = self.sdp_attn(Q, K, V)
         # Reshape into (bs, len, h, d)
         head.transpose_(1, 2)
-        head = head.contiguous().view(bs_v, l_v, h * d_V)
+        # Reshape into (bs, len, h * d)
+        head = head.reshape(bs_v, l_v, h * d_V)
+
         res = torch.matmul(head, W_O)
-        
         return res
