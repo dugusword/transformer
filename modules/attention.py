@@ -73,6 +73,11 @@ class MultiHeadAttention(nn.Module):
         self.d_model = d_model
         
         self.sdp_attn = ScaledDotProductAttention()
+
+        # Here we used a trick to stack h (d_model by d_K) matrices
+        # together instead of create h different linear layers
+        # To make the dimension more clear, I spelled out the tensors
+        # explicitly instead of using using nn.Linear
         self.W_Q = nn.Parameter(torch.Tensor(d_model, d_K * h))
         self.W_K = nn.Parameter(torch.Tensor(d_model, d_K * h))
         self.W_V = nn.Parameter(torch.Tensor(d_model, d_V * h))
