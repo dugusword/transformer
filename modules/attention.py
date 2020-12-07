@@ -2,14 +2,33 @@ import torch
 from torch import nn
 import math
 
+def create_mask(seq_len):
+    """
+    Helper function to create a square mask
+    
+    Parameters
+    ----------
+    seq_len : int
+        length of the edge
+
+    Returns
+    -------
+    2d tensor of the following shape
+    0 1 1 ... 1
+    0 0 1 ... 1
+    ...
+    0 0 0 ... 0
+    """
+    ones = torch.ones(seq_len, seq_len)
+    mask = torch.triu(ones, diagonal=1).bool()
+    return mask
+
 class ScaledDotProductAttention(nn.Module):
     """
     Scaled Dot-Product Attention Layer
 
     Attributes
     ----------
-    mask    : 1d tensor
-        mask tensor used when applying dot product
     softmax : nn.Functional
         softmax function applied at the last dimension
     """
@@ -18,23 +37,28 @@ class ScaledDotProductAttention(nn.Module):
         super(ScaledDotProductAttention, self).__init__()
         self.softmax = nn.Softmax(dim=-1)
 
-    def forward(self, Q, K, V):
+    def forward(self, Q, K, V, mask=None):
         """
         Parameters
         ----------
-        Q: 4d tensor (batch_size, h, token_len, d_K)
-        K: 4d tensor (batch_size, h, token_len, d_K)
-        V: 4d tensor (batch_size, h, token_len, d_V)
-
+        Q    : 4d tensor (batch_size, h, seq_len, d_K)
+        K    : 4d tensor (batch_size, h, seq_len, d_K)
+        V    : 4d tensor (batch_size, h, seq_len, d_V)
+        mask : 2d tensor (seq_len, seq_len)
+            2d binary tensor, where 1 means connection should be blocked and 
+            0 means no operation will be done
+        
         Returns
         -------
-        4d tensor (batch_size, h, token_len, d_V)
+        4d tensor (batch_size, h, seq_len, d_V)
         """
-        nom = torch.matmul(Q, K.transpose_(2, 3))
-        demon = math.sqrt(K.shape[3])
-        scaled = self.softmax(nom / demon)
-        res = torch.matmul(scaled, V)
-        return res
+        scaled = torch.matmul(Q, K.transpose_(2, 3))
+        scaled = scaled / math.sqrt(K.shape[3])
+        if mask is not None:
+            scaled.masked_fill_(mask, float('-inf'))
+        scaled = self.softmax(scaled)
+        attn = torch.matmul(scaled, V)
+        return attn
 
 
 class MultiHeadAttention(nn.Module):
@@ -46,9 +70,9 @@ class MultiHeadAttention(nn.Module):
     h       : int
         number of parallel heads
     d_K     : int
-        dimension of encoding of both query and key
+        dimension of features in both query and key
     d_V     : int
-        dimension of value encoding
+        dimension of features in value
     d_model : int
         dimension of token embedding
     spd_attn: ScaledDotProductattention layer
@@ -75,7 +99,7 @@ class MultiHeadAttention(nn.Module):
         self.sdp_attn = ScaledDotProductAttention()
 
         # Here we used a trick to stack h (d_model by d_K) matrices
-        # together instead of create h different linear layers
+        # together instead of creating h different linear layers
         # To make the dimension more clear, I spelled out the tensors
         # explicitly instead of using using nn.Linear
         self.W_Q = nn.Parameter(torch.Tensor(d_model, d_K * h))
@@ -92,20 +116,23 @@ class MultiHeadAttention(nn.Module):
         nn.init.kaiming_uniform_(self.W_V, a=slope)
         nn.init.kaiming_uniform_(self.W_O, a=slope)
 
-    def forward(self, query, key, val):
+    def forward(self, query, key, val, mask=None):
         """
         Parameters
         ----------
-        query : 3d tensor (batch_size, token_len, d_model)
+        query : 3d tensor (batch_size, seq_len, d_model)
             embedded query sequence
-        key   : 3d tensor (batch_size, token_len, d_model)
+        key   : 3d tensor (batch_size, seq_len, d_model)
             embedded key sequence
-        val   : 3d tensor (batch_size, token_len, d_model)
+        val   : 3d tensor (batch_size, seq_len, d_model)
             embedded value sequence
+        mask  : 2d tensor (seq_len, seq_len)
+            2d binary tensor, where 1 means pass, 0 means block
+        
 
         Returns
         -------
-        3d tensor (batch_size, token_len, d_model)
+        3d tensor (batch_size, seq_len, d_model)
         """
         h, d_K, d_V, d_model = self.h, self.d_K, self.d_V, self.d_model
         W_Q, W_K, W_V, W_O = self.W_Q, self.W_K, self.W_V, self.W_O
@@ -129,11 +156,11 @@ class MultiHeadAttention(nn.Module):
         V.transpose_(1, 2)
 
         # head.shape == (bs, h, len, d)
-        head = self.sdp_attn(Q, K, V)
+        head = self.sdp_attn(Q, K, V, mask)
         # Reshape into (bs, len, h, d)
         head.transpose_(1, 2)
         # Reshape into (bs, len, h * d)
-        head = head.reshape(bs_v, l_v, h * d_V)
+        head = head.reshape(bs_q, l_q, h * d_V)
 
         res = torch.matmul(head, W_O)
         return res
