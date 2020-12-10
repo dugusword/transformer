@@ -46,7 +46,7 @@ class ScaledDotProductAttention(nn.Module):
         V    : 4d tensor (batch_size, h, seq_len, d_V)
         mask : 2d tensor (seq_len, seq_len)
             2d binary tensor, where 1 means connection should be blocked and 
-            0 means no operation will be done
+            0 means values can be fed forward to softmax
         
         Returns
         -------
