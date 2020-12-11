@@ -1,3 +1,4 @@
+import math
 import torch
 from torch import nn
 from .attention import MultiHeadAttention, create_mask
@@ -297,7 +298,7 @@ class TransformerCore(nn.Module):
         dropout : float
             dropout probability
         """
-        super(Transformer, self).__init__()
+        super(TransformerCore, self).__init__()
         self.encoder = Encoder(n_e, h, d_model, d_K, d_V, d_ff, dropout)
         self.decoder = Decoder(n_d, h, d_model, d_K, d_V, d_ff, dropout)
 
@@ -360,9 +361,11 @@ class Transformer(nn.Module):
         dropout : float
             dropout probability
         """
-        self.embedding = Embedding(n_vocab, d_model)
+        super(Transformer, self).__init__()
+        self.embedding = nn.Embedding(n_vocab, d_model)
+        self.factor = math.sqrt(d_model)
         self.pe = PositionalEncoding(d_model)
-        self.core = TransformerCore(n_6, n_d, h, d_model, d_K, d_V, d_ff)
+        self.core = TransformerCore(n_e, n_d, h, d_model, d_K, d_V, d_ff)
         self.linear = nn.Linear(d_model, n_vocab)
 
     def forward(self, in_seq, out_seq):
@@ -380,7 +383,7 @@ class Transformer(nn.Module):
             likelyhood of each token's probability in the vocabulary to
             be the next token of out_seq
         """
-        in_seq = self.embedding(in_seq)
+        in_seq = self.embedding(in_seq) * self.factor
         in_seq = self.pe(in_seq)
         out_seq = self.embedding(out_seq)
         out_seq = self.pe(out_seq)
