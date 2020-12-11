@@ -28,5 +28,5 @@ class TestTransformer(unittest.TestCase):
         decoder = Decoder(6, 8, 3, 2, 2, 4)
         memory = encoder(in_seq)
         decoded = decoder(memory, out_seq)
-        print(decoded)
+        self.assertEqual(decoded.shape, torch.Size([2, 5, 3]))
         

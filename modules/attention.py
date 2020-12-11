@@ -33,10 +33,11 @@ class ScaledDotProductAttention(nn.Module):
         softmax function applied at the last dimension
     """
     
-    def __init__(self):
+    def __init__(self, dropout=0.1):
         super(ScaledDotProductAttention, self).__init__()
         self.softmax = nn.Softmax(dim=-1)
-
+        self.dropout = nn.Dropout(dropout)
+        
     def forward(self, Q, K, V, mask=None):
         """
         Parameters
@@ -57,6 +58,7 @@ class ScaledDotProductAttention(nn.Module):
         if mask is not None:
             scaled.masked_fill_(mask, float('-inf'))
         scaled = self.softmax(scaled)
+        scaled = self.dropout(scaled)
         attn = torch.matmul(scaled, V)
         return attn
 
@@ -88,7 +90,7 @@ class MultiHeadAttention(nn.Module):
         to the output tensor with the same dimension as input
     """
     
-    def __init__(self, h, d_model, d_K, d_V):
+    def __init__(self, h, d_model, d_K, d_V, dropout=0.1):
         super(MultiHeadAttention, self).__init__()
 
         self.h = h
@@ -96,7 +98,7 @@ class MultiHeadAttention(nn.Module):
         self.d_V = d_V
         self.d_model = d_model
         
-        self.sdp_attn = ScaledDotProductAttention()
+        self.sdp_attn = ScaledDotProductAttention(dropout=dropout)
 
         # Here we used a trick to stack h (d_model by d_K) matrices
         # together instead of creating h different linear layers
@@ -106,6 +108,7 @@ class MultiHeadAttention(nn.Module):
         self.W_K = nn.Parameter(torch.Tensor(d_model, d_K * h))
         self.W_V = nn.Parameter(torch.Tensor(d_model, d_V * h))
         self.W_O = nn.Parameter(torch.Tensor(d_V * h, d_model))
+        self.dropout = nn.Dropout(dropout)
         self.reset_parameters()
 
     
@@ -128,7 +131,6 @@ class MultiHeadAttention(nn.Module):
             embedded value sequence
         mask  : 2d tensor (seq_len, seq_len)
             2d binary tensor, where 1 means pass, 0 means block
-        
 
         Returns
         -------
@@ -161,6 +163,5 @@ class MultiHeadAttention(nn.Module):
         head.transpose_(1, 2)
         # Reshape into (bs, len, h * d)
         head = head.reshape(bs_q, l_q, h * d_V)
-
         res = torch.matmul(head, W_O)
-        return res
+        return self.dropout(res)
