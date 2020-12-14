@@ -379,7 +379,7 @@ class Transformer(nn.Module):
 
         Returns
         -------
-        2d tensor (batch_size, vocab_size)
+        2d tensor (batch_size, seq_len, vocab_size)
             likelyhood of each token's probability in the vocabulary to
             be the next token of out_seq
         """

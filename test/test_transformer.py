@@ -42,7 +42,5 @@ class TestTransformer(unittest.TestCase):
         out_seq = torch.LongTensor([[0, 1, 2], [3, 9, 3]])
         transformer = Transformer(10, 6, 6, 8, 3, 2, 2, 4)
         probs = transformer(in_seq, out_seq)
-        print(probs.shape)
-        print(probs.size(2))
-        print(probs.shape[2])
-        print(probs.view(-1, 10).shape)
+        self.assertEqual(probs.shape, torch.Size([2, 3, 10]))
+
