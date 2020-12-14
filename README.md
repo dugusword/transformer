@@ -18,6 +18,6 @@ I wrote this for learning purpose, with detailed comments and documentation to h
 `1` token of the sequence  
 `3` embedding  
 
-Raw `in_seq` and `out_seq` are 2d int tensors with the following dimension:
-`0` batch
-`1` token of the sequence
+Raw `in_seq` and `out_seq` are 2d int tensors with the following dimension:  
+`0` batch  
+`1` token of the sequence  
