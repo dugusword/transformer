@@ -5,10 +5,10 @@ I wrote this for learning purpose, with detailed comments and documentation to h
 ## Naming Conventions of Commonly Used Variables
 `d_model` dimension of token embedding  
 `d_V` number of features in value  
-`d_K` number of features in query and key 
-`h` number of attention heads
-`in_seq` input sequence
-`out_seq` output or target sequence
+`d_K` number of features in query and key  
+`h` number of attention heads  
+`in_seq` input sequence  
+`out_seq` output or target sequence  
 `query` raw query tensor  
 `key` raw key tensor  
 `value` raw value tensor  
