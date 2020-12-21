@@ -1,6 +1,7 @@
 import math
 import torch
 from torch import nn
+import torch.nn.functional as F
 from .attention import MultiHeadAttention, create_mask
 from .feed_forward import FeedForwardNetwork
 
@@ -368,6 +369,12 @@ class Transformer(nn.Module):
         self.core = TransformerCore(n_e, n_d, h, d_model, d_K, d_V, d_ff)
         self.linear = nn.Linear(d_model, n_vocab)
 
+    
+    def reset_parameters(self):
+        for p in self.parameters():
+            if p.dim() > 1:
+                nn.init.xavier_uniform(p)
+        
     def forward(self, in_seq, out_seq):
         """
         Parameters
@@ -388,4 +395,5 @@ class Transformer(nn.Module):
         out_seq = self.embedding(out_seq)
         out_seq = self.pe(out_seq)
         probs = self.linear(out_seq)
+        probs = F.log_softmax(probs, dim=-1)
         return probs

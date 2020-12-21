@@ -89,7 +89,7 @@ def run_epoch(data_iter, model, criterion, optimizer):
         total_loss += loss
         tokens += batch.ntokens
         total_tokens += batch.ntokens
-        if i % 100 == 0:
+        if i % 100 == 1:
             elapsed = time.time() - start
             fmt = "Step: %d Elapsed: %f Loss: %f Tokens/sec: %f"
             lpt = loss / batch.ntokens
