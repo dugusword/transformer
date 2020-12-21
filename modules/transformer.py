@@ -110,7 +110,7 @@ class DecoderUnit(nn.Module):
         -------
         3d tensor (batch_size, seq_len, d_model)
         """
-        mask = create_mask(seq.shape[1])
+        mask = create_mask(seq.shape[1], seq.device)
         a1 = self.attn1(seq, seq, seq, mask)
         a1 = self.norm1(seq + a1)
 

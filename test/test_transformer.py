@@ -44,3 +44,5 @@ class TestTransformer(unittest.TestCase):
         probs = transformer(in_seq, out_seq)
         self.assertEqual(probs.shape, torch.Size([2, 3, 10]))
 
+if __name__ == '__main__':
+    unittest.main()

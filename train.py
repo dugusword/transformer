@@ -1,14 +1,13 @@
 import time
 import torch
 from torch import nn, optim
-from torchtext import data, datasets
 import torch.nn.functional as F
 
 
 class Scheduler:
     def __init__(self, optimizer, d_model, warmup_steps):
         self.optimizer = optimizer
-        self.last_step = -1
+        self.last_step = 0
         self.factor = d_model ** (-0.5)
         self.warmup_factor = warmup_steps ** (-1.5)
 
@@ -22,7 +21,7 @@ class Scheduler:
 
 def scheduled_adam_optimizer(model):
     adam = optim.Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-9)
-    return Scheduler(adam, model.embedding.ebedding_dim, 4000)
+    return Scheduler(adam, model.embedding.embedding_dim, 4000)
 
         
 class Batch:
@@ -44,6 +43,7 @@ class LabelSmoothing(nn.Module):
     def forward(self, pred, gold):
         """
         Parameters
+        ----------
         pred : 2d tensor (batch_size * seq_len, n_vocab)
         gold : 1d tensor of int (batch_size * seq_len)
         """
@@ -57,12 +57,24 @@ class LabelSmoothing(nn.Module):
         return self.criterion(pred, dist)
         
 
-def compute_loss(pred, gold):
-    gold = gold.view(1, -1)
-    loss = F.cross_entropy(pred, gold)
+def compute_loss(pred, gold, ntokens, criterion):
+    """
+    Parameters
+    ----------
+    pred : 3d tensor (batch_size, seq_len, n_vocab)
+        this is the output of the transformer model
+    gold : 2d tenasor of int (batch_size, seq_len)
+        target sequence
+    """
+    # flatten pred and gold
+    pred = pred.reshape(-1, pred.shape[2])
+    gold = gold.reshape(-1)
+    loss = criterion(pred, gold) / ntokens
+    return loss
 
+    
         
-def run_epoch(data_iter, model, loss_func):
+def run_epoch(data_iter, model, criterion, optimizer):
     start = time.time()
     model.train()
     total_loss = 0
@@ -71,19 +83,20 @@ def run_epoch(data_iter, model, loss_func):
     
     for i, batch in enumerate(data_iter):
         out = model.forward(batch.in_seq, batch.out_seq)
-        loss = loss_func(out, batch.y, batch.ntokens)
+        loss = compute_loss(out, batch.y, batch.ntokens, criterion)
         loss.backward()
+        optimizer.step()
         total_loss += loss
         tokens += batch.ntokens
         total_tokens += batch.ntokens
-        
-        if i % 50 == 0:
+        if i % 100 == 0:
             elapsed = time.time() - start
-            fmt = "Step: {} Elapsed: {} Loss: {} Tokens/sec: {}"
+            fmt = "Step: %d Elapsed: %f Loss: %f Tokens/sec: %f"
             lpt = loss / batch.ntokens
             tps = tokens / elapsed
-            print(fmt.format(i, elapsed, lpt, tps))
+            print(fmt % (i, elapsed, lpt, tps))
             tokens = 0
+            start = time.time()
 
     return total_loss, total_tokens
 

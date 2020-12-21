@@ -2,7 +2,7 @@ import torch
 from torch import nn
 import math
 
-def create_mask(seq_len):
+def create_mask(seq_len, device):
     """
     Helper function to create a square mask
     
@@ -20,7 +20,8 @@ def create_mask(seq_len):
     0 0 0 ... 0
     """
     ones = torch.ones(seq_len, seq_len)
-    mask = torch.triu(ones, diagonal=1).bool()
+    mask = torch.triu(ones, diagonal=1, device=device).bool()
+    
     return mask
 
 class ScaledDotProductAttention(nn.Module):
