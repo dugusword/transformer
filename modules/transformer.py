@@ -394,6 +394,7 @@ class Transformer(nn.Module):
         in_seq = self.pe(in_seq)
         out_seq = self.embedding(out_seq)
         out_seq = self.pe(out_seq)
+        probs = self.core(in_seq, out_seq)
         probs = self.linear(out_seq)
         probs = F.log_softmax(probs, dim=-1)
         return probs

@@ -20,7 +20,7 @@ def create_mask(seq_len, device):
     0 0 0 ... 0
     """
     ones = torch.ones(seq_len, seq_len)
-    mask = torch.triu(ones, diagonal=1, device=device).bool()
+    mask = torch.triu(ones, diagonal=1).bool().to(device)
     
     return mask
 
