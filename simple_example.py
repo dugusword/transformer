@@ -18,7 +18,7 @@ if __name__ == '__main__':
     n_vocab = 10
 
     model = Transformer(n_vocab)
-    criterion = LabelSmoothing(n_vocab, 0.1)
+    criterion = LabelSmoothing(n_vocab, 0.)
     optimizer = scheduled_adam_optimizer(model)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)

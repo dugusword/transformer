@@ -368,12 +368,12 @@ class Transformer(nn.Module):
         self.pe = PositionalEncoding(d_model)
         self.core = TransformerCore(n_e, n_d, h, d_model, d_K, d_V, d_ff)
         self.linear = nn.Linear(d_model, n_vocab)
-
+        self.reset_parameters()
     
     def reset_parameters(self):
         for p in self.parameters():
             if p.dim() > 1:
-                nn.init.xavier_uniform(p)
+                nn.init.xavier_uniform_(p)
         
     def forward(self, in_seq, out_seq):
         """

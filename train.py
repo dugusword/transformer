@@ -20,7 +20,7 @@ class Scheduler:
         self.optimizer.step()
 
 def scheduled_adam_optimizer(model):
-    adam = optim.Adam(model.parameters(), betas=(0.9, 0.98), eps=1e-9)
+    adam = optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9)
     return Scheduler(adam, model.embedding.embedding_dim, 4000)
 
         
