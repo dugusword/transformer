@@ -22,9 +22,10 @@ if __name__ == '__main__':
     optimizer = scheduled_adam_optimizer(model)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
-    data_iter = data_gen(n_vocab, 128, 1000, device)
     
-    for epoch in range(100):
+    for epoch in range(10):
+        print("Epoch: {}".format(epoch))
+        data_iter = data_gen(n_vocab, 128, 200, device)
         run_epoch(data_iter, model, criterion, optimizer)
 
     in_seq = torch.LongTensor([[1, 7, 5, 2, 3, 4, 5, 0]]).to(device)
@@ -33,6 +34,6 @@ if __name__ == '__main__':
     model.eval()
     
     for i in range(19):
-        pred = model(in_seq, out_seq[0, :i+1])
-        out_seq[0, i + 1] = torch.argmax(pred, dim=2)[0][i + 1]
+        pred = model(in_seq, out_seq[:, :i+1])
+        out_seq[0, i + 1] = torch.argmax(pred, dim=2)[0][-1]
     print(out_seq)
