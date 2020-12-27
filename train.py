@@ -19,6 +19,9 @@ class Scheduler:
             p['lr'] = lr
         self.optimizer.step()
 
+    def zero_grad(self):
+        self.optimizer.zero_grad()
+        
 def scheduled_adam_optimizer(model):
     adam = optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9)
     return Scheduler(adam, model.embedding.embedding_dim, 4000)
@@ -86,6 +89,7 @@ def run_epoch(data_iter, model, criterion, optimizer):
         loss = compute_loss(out, batch.y, batch.ntokens, criterion)
         loss.backward()
         optimizer.step()
+        optimizer.zero_grad()
         total_loss += loss
         tokens += batch.ntokens
         total_tokens += batch.ntokens

@@ -21,11 +21,12 @@ if __name__ == '__main__':
     criterion = LabelSmoothing(n_vocab, 0.)
     optimizer = scheduled_adam_optimizer(model)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    #device = 'cpu'
     model.to(device)
     
     for epoch in range(10):
         print("Epoch: {}".format(epoch))
-        data_iter = data_gen(n_vocab, 128, 200, device)
+        data_iter = data_gen(n_vocab, 64, 100, device)
         run_epoch(data_iter, model, criterion, optimizer)
 
     in_seq = torch.LongTensor([[1, 7, 5, 2, 3, 4, 5, 0]]).to(device)
