@@ -26,7 +26,7 @@ if __name__ == '__main__':
     
     for epoch in range(10):
         print("Epoch: {}".format(epoch))
-        data_iter = data_gen(n_vocab, 64, 100, device)
+        data_iter = data_gen(n_vocab, 128, 500, device)
         run_epoch(data_iter, model, criterion, optimizer)
 
     in_seq = torch.LongTensor([[1, 7, 5, 2, 3, 4, 5, 0]]).to(device)
