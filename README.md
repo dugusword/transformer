@@ -17,6 +17,58 @@ out_seq = torch.LongTensor([[1]]).to(device)
 pred = model(in_seq, out_seq)
 ```
 
+## Documentation of Transformer class
+```python3
+class Transformer(nn.Module):
+"""
+    Attributes
+    ----------
+    embedding : nn.Embedding
+    pe        : PositionalEncoding
+    core      : TransformerCore
+    linear    : nn.Linear
+"""
+    def __init__(self, n_vocab, n_e=6, n_d=6, h=8, d_model=512,
+                 d_K=512, d_V=512, d_ff=2048, dropout=0.1):
+        """
+        Parameters
+        ----------
+        n_vocab : int
+            size of vocab
+        n_e     : int
+            number of EncoderUnit 
+        n_d     : int
+            number of DecoderUnit
+        h       : int
+            number of attention head in each encoder/decoder
+        d_model : int
+            dimension of token embedding
+        d_K     : int
+            dimension of features in query and key
+        d_V     : int
+            dimension of features in value
+        dropout : float
+            dropout probability
+        """
+        
+    def forward(self, in_seq, out_seq):
+        """
+        Parameters
+        ----------
+        in_seq  : 2d tensor of int (batch_size, seq_len)
+            input sequence
+        out_seq : 2d tensor of int (batch_size, seq_len)
+            already produced output/target sequence
+
+        Returns
+        -------
+        2d tensor (batch_size, seq_len, vocab_size)
+            likelyhood of each token's probability in the vocabulary to
+            be the next token of out_seq
+        """
+
+```
+
 ## Naming Conventions of Commonly Used Variables
 |Variable|Meaning|
 |---|---|
