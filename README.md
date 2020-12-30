@@ -2,6 +2,21 @@
 A PyTorch Implementation of Transformer. The original architecture is described in the "Attention is All You Need" paper (https://arxiv.org/abs/1706.03762).
 I wrote this for learning purpose, with detailed comments and documentation to help myself and potential reader to follow through.
 
+## A Very Simple Example
+```python3
+import torch
+from modules.transformer import Transformer
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model = Transformer(27)
+model.to(device)
+
+in_seq = torch.LongTensor([[1, 7, 5, 2, 3, 4, 5, 0]]).to(device)
+out_seq = torch.LongTensor([[1]]).to(device)
+
+pred = model(in_seq, out_seq)
+```
+
 ## Naming Conventions of Commonly Used Variables
 |Variable|Meaning|
 |---|---|
