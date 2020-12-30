@@ -388,7 +388,7 @@ class Transformer(nn.Module):
         Returns
         -------
         2d tensor (batch_size, seq_len, vocab_size)
-            likelyhood of each token's probability in the vocabulary to
+            likelyhood of each token's log probability in the vocabulary to
             be the next token of out_seq
         """
         in_seq = self.embedding(in_seq) * self.factor
