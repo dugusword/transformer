@@ -20,14 +20,14 @@ pred = model(in_seq, out_seq)
 ## Documentation of Transformer class
 ```python3
 class Transformer(nn.Module):
-"""
-Attributes
-----------
-embedding : nn.Embedding
-pe        : PositionalEncoding
-core      : TransformerCore
-linear    : nn.Linear
-"""
+    """
+    Attributes
+    ----------
+    embedding : nn.Embedding
+    pe        : PositionalEncoding
+    core      : TransformerCore
+    linear    : nn.Linear
+    """
     def __init__(self, n_vocab, n_e=6, n_d=6, h=8, d_model=512,
                  d_K=512, d_V=512, d_ff=2048, dropout=0.1):
         """
