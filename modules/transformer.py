@@ -369,7 +369,6 @@ class Transformer(nn.Module):
         self.core = TransformerCore(n_e, n_d, h, d_model, d_K, d_V, d_ff)
         self.linear = nn.Linear(d_model, n_vocab)
         self.reset_parameters()
-        self.half()
     
     def reset_parameters(self):
         for p in self.parameters():
